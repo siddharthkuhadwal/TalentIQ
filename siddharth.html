@@ -1,0 +1,486 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101b2d">
+<title>AirSense Pro | Environmental Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#101b2d;
+  --navy2:#17283d;
+  --green:#1da87a;
+  --green-light:#e6f7ef;
+  --bg:#f5f7fb;
+  --white:#fff;
+  --text:#192536;
+  --muted:#8290a3;
+  --border:#e8edf3;
+  --shadow:0 5px 24px rgba(28,45,72,.045);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text)}
+button,select{font:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:248px;background:var(--navy);color:#fff;
+  padding:28px 17px;display:flex;flex-direction:column;flex-shrink:0;
+}
+.brand{padding:0 10px 36px;font-size:22px;font-weight:800;letter-spacing:-.8px}
+.brand span{color:#43d6a0}
+.brand small{display:block;font-size:9px;letter-spacing:3px;color:#8fa2b9;margin-top:6px}
+.nav-heading{font-size:10px;letter-spacing:1.7px;color:#71849e;padding:12px}
+.nav{display:flex;align-items:center;gap:12px;padding:13px 12px;border-radius:9px;
+  color:#aab8cb;font-size:12px;margin:3px 0;transition:.2s}
+.nav:hover,.nav.active{background:#20394b;color:#65e2b0}
+.nav .ico{font-size:17px;width:20px;text-align:center}
+.sidebar-bottom{margin-top:auto;padding:15px 12px;color:#9aabc0;font-size:11px;line-height:1.9}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#40d99b;margin-right:7px}
+.main{flex:1;min-width:0;padding:30px 34px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:26px}
+.eyebrow{font-size:10px;letter-spacing:1.6px;color:var(--muted);font-weight:700;margin-bottom:8px}
+h1{font-size:27px;letter-spacing:-1.1px;font-weight:800}
+.subtitle{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,.btn{border:1px solid var(--border);background:white;border-radius:10px;padding:11px 13px;font-size:12px;color:var(--text)}
+.btn{font-weight:600;transition:.2s}
+.btn:hover{border-color:var(--green);color:var(--green)}
+.btn-primary{background:var(--navy);color:white;border-color:var(--navy)}
+.btn-primary:hover{background:#233d51;color:white}
+.demo-notice{display:flex;align-items:flex-start;gap:10px;background:#fff8e9;
+  border:1px solid #f3e1b5;color:#856221;padding:13px 15px;border-radius:10px;
+  font-size:11px;line-height:1.7;margin-bottom:21px}
+.demo-notice strong{white-space:nowrap}
+.grid{display:grid;gap:18px}
+.overview{grid-template-columns:minmax(0,1.25fr) repeat(2,minmax(0,1fr));margin-bottom:18px}
+.panel{background:white;border:1px solid var(--border);border-radius:16px;padding:21px;box-shadow:var(--shadow);min-width:0}
+.panel-title{font-size:14px;font-weight:700}
+.panel-subtitle{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.7}
+.aqi-panel{background:linear-gradient(145deg,#112a3b,#194b4c);color:white;border:0;position:relative;overflow:hidden}
+.aqi-panel:after{content:"";position:absolute;width:190px;height:190px;border:1px solid #ffffff12;border-radius:50%;right:-65px;top:-60px;box-shadow:0 0 0 25px #ffffff08,0 0 0 50px #ffffff05}
+.aqi-head{display:flex;justify-content:space-between;gap:8px;align-items:center;position:relative;z-index:1}
+.aqi-label{font-size:11px;color:#c0d7d9}
+.pill{border-radius:30px;background:#ffffff17;color:#a5f2d2;padding:7px 10px;font-size:10px;font-weight:600}
+.aqi-number{font-size:61px;letter-spacing:-3px;font-weight:800;margin:15px 0 1px;position:relative;z-index:1}
+.aqi-number span{font-size:12px;letter-spacing:0;font-weight:500;color:#c0d7d9}
+.aqi-category{font-size:13px;font-weight:700;color:#6de3ae;position:relative;z-index:1}
+.aqi-desc{font-size:10px;line-height:1.8;color:#bdd2d5;margin-top:12px;position:relative;z-index:1}
+.scale{display:flex;gap:3px;margin-top:20px}
+.scale i{height:5px;flex:1;border-radius:5px}
+.scale-labels{display:flex;justify-content:space-between;font-size:9px;color:#c0d7d9;margin-top:7px}
+.metric-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.metric-icon{width:37px;height:37px;border-radius:11px;display:grid;place-items:center;font-size:17px}
+.icon-green{background:#e8f8f0;color:#139b6e}
+.icon-blue{background:#edf2ff;color:#5879ec}
+.icon-orange{background:#fff4e5;color:#df932c}
+.icon-purple{background:#f5edff;color:#9364d8}
+.metric-name{font-size:11px;color:var(--muted);font-weight:600}
+.metric-value{font-size:29px;letter-spacing:-1.2px;font-weight:800;margin:18px 0 5px}
+.metric-value small{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:0}
+.metric-foot{font-size:10px;color:var(--muted);line-height:1.7}
+.metric-foot strong{color:var(--green)}
+.middle{grid-template-columns:minmax(0,1.7fr) minmax(260px,1fr);margin-bottom:18px}
+.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.range-buttons{display:flex;gap:4px;background:#f3f5f8;border-radius:8px;padding:3px}
+.range-buttons button{border:0;background:transparent;color:var(--muted);padding:7px 9px;border-radius:6px;font-size:10px}
+.range-buttons button.active{background:white;color:var(--text);box-shadow:0 1px 4px #0000000b;font-weight:700}
+.chart-box{height:255px;margin-top:22px;position:relative}
+.legend-row{display:flex;gap:15px;flex-wrap:wrap;font-size:10px;color:var(--muted);margin-top:14px}
+.legend-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.pollution-chart{height:205px;position:relative;margin-top:15px}
+.pollution-list{display:grid;gap:16px;margin-top:10px}
+.pollution-line{display:flex;justify-content:space-between;gap:8px;font-size:11px;margin-bottom:8px}
+.pollution-line span{color:var(--muted)}
+.track{height:6px;background:#edf1f5;border-radius:20px;overflow:hidden}
+.fill{height:100%;border-radius:20px;transition:width .3s}
+.bottom{grid-template-columns:1.1fr 1fr 1fr;margin-bottom:20px}
+.insight{padding:21px;border-radius:15px;background:white;border:1px solid var(--border)}
+.insight.primary{background:#132f3d;color:white;border-color:#132f3d}
+.insight-icon{width:38px;height:38px;border-radius:11px;background:#edf8f3;display:grid;place-items:center;font-size:19px;margin-bottom:18px}
+.insight.primary .insight-icon{background:#ffffff14}
+.insight h3{font-size:13px;margin-bottom:9px}
+.insight p{font-size:11px;line-height:1.9;color:var(--muted)}
+.insight.primary p{color:#c4d8dc}
+.insight-tag{display:inline-block;margin-top:15px;font-size:10px;font-weight:700;color:var(--green)}
+.insight.primary .insight-tag{color:#6ce3b0}
+.footer{padding:17px 0 5px;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:10px;line-height:1.9}
+@media(max-width:1200px){
+  .main{padding:25px 20px}
+  .overview{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .aqi-panel{grid-column:1/-1}
+}
+@media(max-width:850px){
+  .sidebar{width:70px;padding:22px 9px}
+  .brand{font-size:0;padding:5px 9px 35px}
+  .brand:first-letter{font-size:23px}
+  .brand small,.nav-heading,.nav span:not(.ico),.sidebar-bottom{display:none}
+  .nav{justify-content:center;padding:13px 4px}
+  .nav .ico{font-size:20px}
+  .middle{grid-template-columns:1fr}
+  .bottom{grid-template-columns:1fr}
+}
+@media(max-width:540px){
+  .main{padding:19px 12px}
+  h1{font-size:23px}
+  .overview{gap:10px}
+  .panel{padding:16px}
+  .metric-value{font-size:24px}
+  .chart-box{height:225px}
+  .aqi-number{font-size:54px}
+  .actions{width:100%}
+  .actions select,.actions button{flex:1}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand">Air<span>Sense</span><small>ENVIRONMENTAL INTELLIGENCE</small></div>
+  <div class="nav-heading">WORKSPACE</div>
+  <div class="nav active"><span class="ico">◈</span><span>Overview</span></div>
+  <div class="nav"><span class="ico">⌁</span><span>Air Quality Trends</span></div>
+  <div class="nav"><span class="ico">▥</span><span>Pollutant Analysis</span></div>
+  <div class="nav"><span class="ico">✳</span><span>Health Advisory</span></div>
+  <div class="nav-heading">RESOURCES</div>
+  <div class="nav"><span class="ico">ⓘ</span><span>About AQI</span></div>
+  <div class="sidebar-bottom">
+    <span class="status-dot"></span> Dashboard operational
+    <br>Air quality insights made clear.
+    <br><br>AirSense Pro · v1.0
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">ENVIRONMENTAL INTELLIGENCE / OVERVIEW</div>
+      <h1>Air Quality Overview</h1>
+      <p class="subtitle" id="dateText">Your environmental snapshot</p>
+    </div>
+    <div class="actions">
+      <select id="city" aria-label="Choose city">
+        <option value="Delhi">New Delhi, India</option>
+        <option value="Mumbai">Mumbai, India</option>
+        <option value="Bengaluru">Bengaluru, India</option>
+        <option value="Chennai">Chennai, India</option>
+        <option value="Kolkata">Kolkata, India</option>
+      </select>
+      <button class="btn btn-primary" id="refresh">↻ Refresh</button>
+    </div>
+  </header>
+
+  <div class="demo-notice">
+    <strong>DEMO DATA</strong>
+    <span>This dashboard uses illustrative sample readings. It is not connected to live sensors or an air-quality API. AQI categories shown use approximate US AQI bands for demonstration.</span>
+  </div>
+
+  <section class="grid overview">
+    <article class="panel aqi-panel">
+      <div class="aqi-head">
+        <span class="aqi-label">Air Quality Index</span>
+        <span class="pill">● Sample reading</span>
+      </div>
+      <div class="aqi-number" id="aqi">156 <span>/ 500</span></div>
+      <div class="aqi-category" id="aqiCategory">Unhealthy</div>
+      <p class="aqi-desc" id="aqiDescription">Air quality may affect sensitive individuals. Consider reducing prolonged outdoor exertion.</p>
+      <div class="scale">
+        <i style="background:#32b878"></i><i style="background:#e5ca4c"></i>
+        <i style="background:#ed9b4c"></i><i style="background:#e85d65"></i>
+        <i style="background:#9c66c8"></i><i style="background:#7b3545"></i>
+      </div>
+      <div class="scale-labels"><span>Good</span><span>Moderate</span><span>Poor</span><span>Hazardous</span></div>
+    </article>
+
+    <article class="panel">
+      <div class="metric-top">
+        <span class="metric-name">Fine Particles · PM2.5</span>
+        <span class="metric-icon icon-blue">◌</span>
+      </div>
+      <div class="metric-value" id="pm25">65.4 <small>µg/m³</small></div>
+      <p class="metric-foot">Fine particulate concentration<br><strong>Primary tracked pollutant</strong></p>
+    </article>
+
+    <article class="panel">
+      <div class="metric-top">
+        <span class="metric-name">Coarse Particles · PM10</span>
+        <span class="metric-icon icon-green">◍</span>
+      </div>
+      <div class="metric-value" id="pm10">112 <small>µg/m³</small></div>
+      <p class="metric-foot">Coarse particulate concentration<br><strong>Particle monitoring</strong></p>
+    </article>
+
+    <article class="panel">
+      <div class="metric-top">
+        <span class="metric-name">Ozone · O₃</span>
+        <span class="metric-icon icon-orange">≈</span>
+      </div>
+      <div class="metric-value" id="ozone">42 <small>ppb</small></div>
+      <p class="metric-foot">Ground-level ozone<br>Illustrative concentration</p>
+    </article>
+
+    <article class="panel">
+      <div class="metric-top">
+        <span class="metric-name">Carbon Monoxide · CO</span>
+        <span class="metric-icon icon-purple">◎</span>
+      </div>
+      <div class="metric-value" id="co">0.8 <small>ppm</small></div>
+      <p class="metric-foot">Carbon monoxide<br>Illustrative concentration</p>
+    </article>
+  </section>
+
+  <section class="grid middle">
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Air Quality Trends</h2>
+          <p class="panel-subtitle">Sample AQI changes throughout the selected period</p>
+        </div>
+        <div class="range-buttons" aria-label="Trend timeframe">
+          <button data-range="12" class="active">12H</button>
+          <button data-range="24">24H</button>
+          <button data-range="7">7D</button>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="trendChart"></canvas></div>
+      <div class="legend-row"><span><i class="legend-dot" style="background:#1da87a"></i>Sample AQI</span><span>Lower values generally indicate cleaner air</span></div>
+    </article>
+
+    <article class="panel">
+      <h2 class="panel-title">Pollutant Composition</h2>
+      <p class="panel-subtitle">Illustrative relative shares, not an AQI calculation</p>
+      <div class="pollution-chart"><canvas id="pollutionChart"></canvas></div>
+      <div class="pollution-list">
+        <div>
+          <div class="pollution-line"><span>PM2.5</span><strong id="pm25Label">65.4 µg/m³</strong></div>
+          <div class="track"><div class="fill" id="pm25Bar" style="width:65%;background:#5277f7"></div></div>
+        </div>
+        <div>
+          <div class="pollution-line"><span>PM10</span><strong id="pm10Label">112 µg/m³</strong></div>
+          <div class="track"><div class="fill" id="pm10Bar" style="width:56%;background:#1da87a"></div></div>
+        </div>
+        <div>
+          <div class="pollution-line"><span>CO</span><strong id="coLabel">0.8 ppm</strong></div>
+          <div class="track"><div class="fill" id="coBar" style="width:27%;background:#f4ad48"></div></div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="grid bottom">
+    <article class="insight primary">
+      <div class="insight-icon">✳</div>
+      <h3 id="healthTitle">Reduce prolonged outdoor exertion</h3>
+      <p id="healthText">When air quality is poor, consider shorter outdoor activities and follow local public-health guidance.</p>
+      <div class="insight-tag">HEALTH ADVISORY</div>
+    </article>
+    <article class="insight">
+      <div class="insight-icon">⌁</div>
+      <h3>Environmental insight</h3>
+      <p id="insightText">Fine particles are one important indicator to monitor when assessing urban air quality.</p>
+      <div class="insight-tag">DATA INTERPRETATION</div>
+    </article>
+    <article class="insight">
+      <div class="insight-icon">⌂</div>
+      <h3>Recommended action</h3>
+      <p>Review official local air-quality reports before outdoor exercise. Sensitive individuals should follow advice from their healthcare professionals.</p>
+      <div class="insight-tag">PRACTICAL GUIDANCE</div>
+    </article>
+  </section>
+
+  <footer class="footer">
+    AIRSENSE PRO · AIR QUALITY ANALYTICS PLATFORM<br>
+    Educational demonstration · Sample data only · Not a medical device
+  </footer>
+</main>
+</div>
+
+<script>
+const cities = {
+  Delhi:     {aqi:156,pm25:65.4,pm10:112,ozone:42,co:.8},
+  Mumbai:    {aqi:92,pm25:34.2,pm10:74,ozone:36,co:.5},
+  Bengaluru: {aqi:68,pm25:22.1,pm10:48,ozone:29,co:.4},
+  Chennai:   {aqi:81,pm25:27.5,pm10:62,ozone:33,co:.5},
+  Kolkata:   {aqi:124,pm25:49.8,pm10:96,ozone:39,co:.7}
+};
+
+let selectedRange = 12;
+let variation = 0;
+
+function category(aqi) {
+  if(aqi <= 50) return ["Good","#32b878","Air quality is satisfactory for most people."];
+  if(aqi <= 100) return ["Moderate","#d0a321","Air quality is generally acceptable; unusually sensitive people may need extra care."];
+  if(aqi <= 150) return ["Unhealthy for Sensitive Groups","#e58b36","Sensitive individuals may benefit from reducing prolonged outdoor exertion."];
+  if(aqi <= 200) return ["Unhealthy","#e85d65","Consider reducing prolonged outdoor exertion and following local health guidance."];
+  if(aqi <= 300) return ["Very Unhealthy","#9c66c8","Reduce outdoor exposure and follow official public-health advice."];
+  return ["Hazardous","#7b3545","Avoid outdoor exertion and follow official emergency public-health advice."];
+}
+
+function createTrend(base, count) {
+  return Array.from({length:count},(_,i) => {
+    const wave = Math.sin(i * .85) * 19 + Math.cos(i * .36) * 12;
+    return Math.max(5,Math.round(base + wave + variation));
+  });
+}
+
+function labelsFor(count) {
+  if(selectedRange === 7) return ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  if(selectedRange === 24) return Array.from({length:24},(_,i)=>`${String(i).padStart(2,"0")}:00`);
+  return ["00:00","02:00","04:00","06:00","08:00","10:00","12:00","14:00","16:00","18:00","20:00","22:00"];
+}
+
+const trend = new Chart(document.getElementById("trendChart"),{
+  type:"line",
+  data:{
+    labels:labelsFor(12),
+    datasets:[{
+      label:"Sample AQI",
+      data:createTrend(150,12),
+      borderColor:"#1da87a",
+      backgroundColor:"rgba(29,168,122,.10)",
+      borderWidth:2.5,
+      pointRadius:2.5,
+      pointHoverRadius:5,
+      fill:true,
+      tension:.4
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{intersect:false,mode:"index"},
+    plugins:{
+      legend:{display:false},
+      tooltip:{backgroundColor:"#132638",padding:12,callbacks:{
+        label:ctx=>` AQI: ${ctx.raw} (sample)`
+      }}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{color:"#8290a3",maxTicksLimit:8,font:{size:10}}},
+      y:{beginAtZero:true,grid:{color:"#edf1f5"},ticks:{color:"#8290a3",font:{size:10}}}
+    }
+  }
+});
+
+const pollution = new Chart(document.getElementById("pollutionChart"),{
+  type:"doughnut",
+  data:{
+    labels:["PM2.5","PM10","Ozone","CO"],
+    datasets:[{
+      data:[65.4,112,42,.8],
+      backgroundColor:["#5277f7","#1da87a","#f4ad48","#a17ade"],
+      borderWidth:3,borderColor:"#fff",hoverOffset:5
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,cutout:"72%",
+    plugins:{
+      legend:{position:"bottom",labels:{usePointStyle:true,pointStyle:"circle",padding:14,boxWidth:7,font:{size:10}}},
+      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} (raw value; units differ)`}}
+    }
+  }
+});
+
+function render() {
+  const city = document.getElementById("city").value;
+  const d = cities[city];
+  const aqi = Math.max(5,d.aqi+variation);
+  const [label,color,description] = category(aqi);
+
+  document.getElementById("aqi").innerHTML = `${aqi} <span>/ 500</span>`;
+  document.getElementById("aqiCategory").textContent = label;
+  document.getElementById("aqiCategory").style.color = color;
+  document.getElementById("aqiDescription").textContent = description;
+
+  const pm25 = Math.max(1,d.pm25+variation*.3);
+  const pm10 = Math.max(1,d.pm10+variation);
+  const ozone = Math.max(1,d.ozone+Math.round(variation*.4));
+  const co = Math.max(.1,d.co+variation*.01);
+
+  document.getElementById("pm25").innerHTML = `${pm25.toFixed(1)} <small>µg/m³</small>`;
+  document.getElementById("pm10").innerHTML = `${Math.round(pm10)} <small>µg/m³</small>`;
+  document.getElementById("ozone").innerHTML = `${ozone} <small>ppb</small>`;
+  document.getElementById("co").innerHTML = `${co.toFixed(2)} <small>ppm</small>`;
+
+  document.getElementById("pm25Label").textContent = `${pm25.toFixed(1)} µg/m³`;
+  document.getElementById("pm10Label").textContent = `${Math.round(pm10)} µg/m³`;
+  document.getElementById("coLabel").textContent = `${co.toFixed(2)} ppm`;
+
+  document.getElementById("pm25Bar").style.width = `${Math.min(100,pm25)}%`;
+  document.getElementById("pm10Bar").style.width = `${Math.min(100,pm10/2)}%`;
+  document.getElementById("coBar").style.width = `${Math.min(100,co/3*100)}%`;
+
+  const values = [pm25,pm10,ozone,co];
+  pollution.data.datasets[0].data = values;
+  pollution.update();
+
+  trend.data.labels = labelsFor(selectedRange);
+  trend.data.datasets[0].data = createTrend(d.aqi,selectedRange === 7 ? 7 : selectedRange);
+  trend.update();
+
+  const healthTitle = document.getElementById("healthTitle");
+  const healthText = document.getElementById("healthText");
+
+  if(aqi <= 50) {
+    healthTitle.textContent = "Air quality is good";
+    healthText.textContent = "The sample index suggests relatively low pollution. Continue checking local official reports as conditions can change.";
+  } else if(aqi <= 100) {
+    healthTitle.textContent = "Stay aware of conditions";
+    healthText.textContent = "Most people may continue usual activities, but unusually sensitive people should monitor conditions and follow local advice.";
+  } else {
+    healthTitle.textContent = "Reduce prolonged outdoor exertion";
+    healthText.textContent = "Consider shorter outdoor activities and follow official local guidance, especially if sensitive to air pollution.";
+  }
+
+  document.getElementById("insightText").textContent =
+    `${city}: this demonstration shows PM2.5 at ${pm25.toFixed(1)} µg/m³ and PM10 at ${Math.round(pm10)} µg/m³. Compare readings over time rather than treating this sample as a real measurement.`;
+
+  document.getElementById("dateText").textContent =
+    `${city}, India · Updated ${new Date().toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})} · Demo preview`;
+}
+
+document.querySelectorAll("[data-range]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    selectedRange = Number(button.dataset.range);
+    document.querySelectorAll("[data-range]").forEach(b=>b.classList.remove("active"));
+    button.classList.add("active");
+    render();
+  });
+});
+
+document.getElementById("city").addEventListener("change",()=>{
+  variation = 0;
+  render();
+});
+
+document.getElementById("refresh").addEventListener("click",()=>{
+  variation = Math.round(Math.random()*12-6);
+  render();
+});
+
+document.querySelectorAll(".nav").forEach(item=>{
+  item.addEventListener("click",()=>{
+    document.querySelectorAll(".nav").forEach(n=>n.classList.remove("active"));
+    item.classList.add("active");
+    const text = item.innerText.trim();
+    const targets = {
+      "Overview":document.querySelector(".overview"),
+      "Air Quality Trends":document.querySelector(".middle"),
+      "Pollutant Analysis":document.querySelector(".middle .panel:last-child"),
+      "Health Advisory":document.querySelector(".bottom"),
+      "About AQI":document.querySelector(".demo-notice")
+    };
+    if(targets[text]) targets[text].scrollIntoView({behavior:"smooth",block:"start"});
+  });
+});
+
+render();
+</script>
+</body>
+</html>
